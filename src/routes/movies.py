@@ -11,8 +11,15 @@ from schemas import MovieDetailResponseSchema, MovieListResponseSchema
 router = APIRouter()
 
 # Write your code here
+
+
 @router.get("/movies/", response_model=MovieListResponseSchema)
-async def get_movies(request: Request, page: int = Query(1, ge=1), per_page: int = Query(10, ge=1), db: AsyncSession = Depends(get_db)):
+async def get_movies(
+        request: Request,
+        page: int = Query(1, ge=1),
+        per_page: int = Query(10, ge=1),
+        db: AsyncSession = Depends(get_db)
+):
     total_items = await db.scalar(select(func.count()).select_from(MovieModel))
     if total_items == 0:
         raise HTTPException(status_code=404, detail="No movies found.")
@@ -20,11 +27,9 @@ async def get_movies(request: Request, page: int = Query(1, ge=1), per_page: int
     if page > 1:
         prev_page = build_url(request, page - 1, per_page)
         start = (page - 1) * per_page
-        end = start + per_page
     elif page == 1:
         prev_page = None
         start = 0
-        end = per_page
     else:
         raise HTTPException(status_code=404, detail="Page not found")
     if page < total_pages:
