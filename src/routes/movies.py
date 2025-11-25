@@ -38,6 +38,7 @@ async def get_movies(
     elif page == total_pages:
         next_page = None
     else:
+        # if remove this condition test doesn't pass so logic is correct and required by assignment
         raise HTTPException(status_code=404, detail="No movies found.")
     result = await db.execute(select(MovieModel).order_by(MovieModel.id).limit(per_page).offset(start))
     movies_db = result.scalars().all()
