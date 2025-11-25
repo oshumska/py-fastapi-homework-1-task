@@ -1,3 +1,4 @@
+import math
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -17,13 +18,13 @@ router = APIRouter()
 async def get_movies(
         request: Request,
         page: int = Query(1, ge=1),
-        per_page: int = Query(10, ge=1),
+        per_page: int = Query(10, ge=1, le=20),
         db: AsyncSession = Depends(get_db)
 ):
     total_items = await db.scalar(select(func.count()).select_from(MovieModel))
     if total_items == 0:
         raise HTTPException(status_code=404, detail="No movies found.")
-    total_pages = total_items // per_page
+    total_pages = math.ceil(total_items / per_page)
     if page > 1:
         prev_page = build_url(request, page - 1, per_page)
         start = (page - 1) * per_page
